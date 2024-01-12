@@ -10,50 +10,35 @@ const CustomEditor = () => {
       () => EditorState.createEmpty(),
     );
     const handleEditorState = (editorState)=>{
+
         // console.log(editorState.getCurrentContent(),'this is editor state')
         setEditorState(editorState);
     }
-    const myKeyBindingFn = (event) => {
-      const { key } = event;
-      // const newEditorState = RichUtils.handleKeyCommand(editorState, event);
-      // if (newEditorState !== editorState) {
-      //   setEditorState(newEditorState);
-      //   return;
-      // }
 
-      if (key === '#' || key === '*') {
-        console.log('reached inside,', key)
-        event.preventDefault(); // Prevent default behavior
-        // Handle Markdown syntax (explained later)
-        const handleMarkdownSyntax = (key, spacePressed = false) => {
-          const contentState = editorState.getCurrentContent();
-          const selection = editorState.getSelection();
-        
-          const currentBlock = contentState.getBlockForKey(selection.getStartKey());
-          const currentBlockType = currentBlock.getType();
-        
-          if (currentBlockType !== 'unstyled') {
-            return; // Only handle at the beginning of a block
-          }
-        
-          // ... logic for creating blocks based on key and spacePressed (explained below)
-          if (key === '#' && spacePressed) {
-            const newBlock = ContentBlock.create({
-              key: contentState.getLastBlock().getKey() + 1,
-              type: 'header-one',
-              text: '',
-              depth: 0,
-              inlineStyleRanges: [],
-              entityRanges: [],
-            });
-          
-            const newContentState = Modifier.insertBlock(contentState, selection, newBlock, null);
-            setEditorState(EditorState.push(editorState, newContentState, 'split-block'));
-          }
-        };
-        handleMarkdownSyntax();
+    const handleBeforeInput = (char) => {
+      console.log(char, ' this is the char')
+      const currentContentState = editorState.getCurrentContent();
+      const selection = editorState.getSelection();
+      const currentBlock = currentContentState.getBlockForKey(
+        selection.getStartKey()
+      );
+      const blockText = currentBlock.getText();
+      if (char === '#' && selection.getStartOffset() === 0) {
+        console.log('inside # at first')
       }
+      if(char === ' ' && blockText.trim() === '#'){
+        console.log('---inside the # and space')
+       // Replace the space with an empty string
     };
+  }
+    // const myKeyBindingFn = (event) => {
+    //   const { key } = event;
+    // console.log(event)
+      // const currentContent = editorState.getCurrentContent();
+      // const currentString = currentContent.getPlainText();
+      // console.log(currentString);
+    // };
+
     const handleButtonClick = () => {
         const contentState = editorState.getCurrentContent();
         const rawContent = convertToRaw(contentState).blocks;
@@ -61,8 +46,13 @@ const CustomEditor = () => {
         rawContent.forEach(element => {
           console.log(element.text)
         });
+        
         // const plainText = ContentState.getPlainText();
         // console.log(plainText);
+
+          // Toggle the inline style to 'header-one-style'
+          setEditorState(RichUtils.toggleInlineStyle(editorState, 'header-one'))
+        
       };
 
     useEffect(()=>{
@@ -81,7 +71,7 @@ const CustomEditor = () => {
   return (
     <div className='border w-full p-4'>
         <button onClick={handleButtonClick}>CHECK</button>
-        <Editor editorState={editorState} onChange={handleEditorState} keyBindingFn={myKeyBindingFn}/>
+        <Editor editorState={editorState} onChange={handleEditorState}  handleBeforeInput={handleBeforeInput}/>
     </div>
   )
 }
