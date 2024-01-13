@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import {Editor, EditorState, convertToRaw, ContentState, RichUtils , getDefaultKeyBinding, KeyBindingUtil, Modifier, ContentBlock} from 'draft-js';
+import {Editor, EditorState, convertToRaw, ContentState, RichUtils , getDefaultKeyBinding, KeyBindingUtil, Modifier, ContentBlock, convertFromRaw} from 'draft-js';
 import 'draft-js/dist/Draft.css';
 
 const {hasCommandModifier} = KeyBindingUtil;
@@ -13,24 +13,34 @@ const CustomEditor = () => {
 
         // console.log(editorState.getCurrentContent(),'this is editor state')
         setEditorState(editorState);
+        const contentState = editorState?.getCurrentContent();
+
+      let currentText = contentState?.getBlockForKey(editorState.getSelection().getAnchorKey()).getText();
+        if (currentText?.startsWith('# ')) {
+          const currentBlockType = RichUtils.getCurrentBlockType(editorState);
+          console.log(currentBlockType, ' this is the type')
+          if(currentBlockType !== 'header-one'){
+            setEditorState(RichUtils.toggleBlockType(editorState, 'header-one'))
+            console.log('reached here')
+          }
+        }
     }
 
-    const handleBeforeInput = (char) => {
-      console.log(char, ' this is the char')
-      const currentContentState = editorState.getCurrentContent();
-      const selection = editorState.getSelection();
-      const currentBlock = currentContentState.getBlockForKey(
-        selection.getStartKey()
-      );
-      const blockText = currentBlock.getText();
-      if (char === '#' && selection.getStartOffset() === 0) {
-        console.log('inside # at first')
+    const handleBeforeChange = (newEditorState) => {
+      const contentState = editorState.getCurrentContent();
+      // const selectionState = editorState.getSelection();
+      // const currentBlock = contentState.getBlockForKey(selectionState.getStartKey());
+      let currentText = contentState.getBlockForKey(editorState.getSelection().getAnchorKey()).getText();
+      // Check if the current block starts with '# ' and the typed character is a space
+      if (currentText.startsWith('# ')) {
+        setEditorState(RichUtils.toggleBlockType(editorState, 'header-one'))
       }
-      if(char === ' ' && blockText.trim() === '#'){
-        console.log('---inside the # and space')
-       // Replace the space with an empty string
+  
+      // Return the new editor state
+      return newEditorState;
     };
-  }
+
+  
     // const myKeyBindingFn = (event) => {
     //   const { key } = event;
     // console.log(event)
@@ -41,18 +51,26 @@ const CustomEditor = () => {
 
     const handleButtonClick = () => {
         const contentState = editorState.getCurrentContent();
+
+        const selection = editorState.getSelection();
+        let currentText = contentState.getBlockForKey(editorState.getSelection().getAnchorKey()).getText();
+        console.log(editorState
+          .getCurrentContent()
+          .getBlockForKey(selection.getStartKey())
+          .getType(), 'content state')
+
         const rawContent = convertToRaw(contentState).blocks;
         console.log(rawContent,'raw');
-        rawContent.forEach(element => {
-          console.log(element.text)
-        });
+        // rawContent.forEach(element => {
+        //   console.log(element.text)
+        // });
         
         // const plainText = ContentState.getPlainText();
         // console.log(plainText);
 
           // Toggle the inline style to 'header-one-style'
-          setEditorState(RichUtils.toggleInlineStyle(editorState, 'header-one'))
-        
+          // setEditorState(RichUtils.toggleInlineStyle(editorState, 'UNDERLINE'))
+          // setEditorState(RichUtils.toggleBlockType(editorState, 'header-one'))
       };
 
     useEffect(()=>{
@@ -71,7 +89,7 @@ const CustomEditor = () => {
   return (
     <div className='border w-full p-4'>
         <button onClick={handleButtonClick}>CHECK</button>
-        <Editor editorState={editorState} onChange={handleEditorState}  handleBeforeInput={handleBeforeInput}/>
+        <Editor editorState={editorState} onChange={handleEditorState}  handleBeforeInput={handleBeforeChange}/>
     </div>
   )
 }
