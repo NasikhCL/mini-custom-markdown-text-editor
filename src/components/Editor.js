@@ -30,23 +30,31 @@ const CustomEditor = () => {
     const newBlocks = []
     blocks.forEach(block => {
       // console.log(element.text,'text')
-      if(block.text.startsWith('# ')){
+      if(block.type === 'header-one'){
+        newBlocks.push(block)
+      }else if(block.text.startsWith('# ')){
         console.log('starts with hash and space')
         block.text=''
         block.type = 'header-one';
+        newBlocks.push(block)
+      }else{
+        block.type = 'unstyled'  
+        newBlocks.push(block)
       }
-      newBlocks.push(block)
     });
     const newRawContent = { ...convertToRaw(currentContent), blocks: newBlocks };
     const newContentState = convertFromRaw(newRawContent);
-    const newEditorState = EditorState.push(editorState, newContentState, 'change-block-type');
+    const newEditorState = EditorState.push(editorState, newContentState, 'change-block');
     // this.editor.update(newEditorState);
-    setEditorState(newEditorState);
+    const selectionState = editorState.getSelection();
+    const newEditorStateWithHandleCursor = EditorState.forceSelection(newEditorState, selectionState);
+    setEditorState(newEditorStateWithHandleCursor);
     // console.log(newEditorState,)
     // setEditorState(editorState);
-    // console.log(blocks) 
+    console.log(blocks) 
     
   };
+  
 
   const handleButtonClick = () => {
     const contentState = editorState.getCurrentContent();
@@ -94,6 +102,8 @@ const CustomEditor = () => {
       <Editor
         editorState={editorState}
         onChange={handleEditorState}
+        preserveSelectionOnBlur={true} 
+
       />
     </div>
   );
