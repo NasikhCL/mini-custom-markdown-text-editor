@@ -24,22 +24,21 @@ const CustomEditor = () => {
 
 
   const [headerOneArr, setHeaderOneArr] =useState([])
-// console.log('com re render')
+  const [boldArr, setBoldArr] =useState([])
   const handleEditorState = (editorState) => {
 
     const currentContent = editorState.getCurrentContent();
     const blocks = convertToRaw(currentContent).blocks;
     const newBlocks = []
     blocks.forEach(block => {
-      // console.log(headerOneArr,'array')
-      // console.log(element.text,'text')
+      
       const isHeaderOne = headerOneArr.includes(block.key)
-      console.log(isHeaderOne)
       if(!isHeaderOne && block.text === ''){
         block.type ='unstyled'
         newBlocks.push(block);
       }else if(isHeaderOne && block.text === ' '){
         block.style = 'unstyled'
+        block.text= ''
         setHeaderOneArr(prev=> prev.filter(prev=> prev !== block.key))
         newBlocks.push(block)
       }else if(isHeaderOne){
@@ -49,12 +48,20 @@ const CustomEditor = () => {
       else if(block.text.startsWith('# ')){
         setHeaderOneArr(prev=> [...prev, block.key]) 
         block.type = 'header-one'
-        block.text = ''
+        block.text = block.text.substring(2); // Remove '# ' from the text
         newBlocks.push(block);
-        console.log('pushed', headerOneArr)
+      }else if(block.text.startsWith('* ')|| boldArr.includes(block.key)){
+        if(!boldArr.includes(block.key)){
+          setBoldArr(prev=> [...prev, block.key])
+        }
+        block.inlineStyleRanges = [{ offset: 0, length: block.text.length, style: 'BOLD' }];
+        block.text = block.text.startsWith('* ') ? block.text.substring(2) : block.text // Remove '* ' from the text
+        newBlocks.push(block);
       }else{
           block.type = 'unstyled'  
+          block.inlineStyleRanges = [];
           newBlocks.push(block)
+
         }
     });
     const newRawContent = { ...convertToRaw(currentContent), blocks: newBlocks };
@@ -63,9 +70,6 @@ const CustomEditor = () => {
     const selectionState = editorState.getSelection();
     const newEditorStateWithHandleCursor = EditorState.forceSelection(newEditorState, selectionState);
     setEditorState(newEditorStateWithHandleCursor);
-    
-    // console.log(newEditorState,)
-    // setEditorState(editorState); 
     console.log(blocks) 
     
   };
@@ -97,18 +101,6 @@ const CustomEditor = () => {
         .getType(),
       "content state"
     );
-
-    console.log(rawContent, "raw");
-    // rawContent.forEach(element => {
-    //   console.log(element.text)
-    // });
-
-    // const plainText = ContentState.getPlainText();
-    // console.log(plainText);
-
-    // Toggle the inline style to 'header-one-style'
-    // setEditorState(RichUtils.toggleInlineStyle(editorState, 'UNDERLINE'))
-    // setEditorState(RichUtils.toggleBlockType(editorState, 'header-one'))
   };
 
   // useEffect(() => {
@@ -128,10 +120,6 @@ const CustomEditor = () => {
       <Editor
         editorState={editorState}
         onChange={handleEditorState}
-        // handleBeforeInput={handleKeyDown}
-        // preserveSelectionOnBlur={true} 
-        // keyBindingFn={myKeyBindingFn}
-        // handleReturn={handleReturn}
       />
     </div>
   );
