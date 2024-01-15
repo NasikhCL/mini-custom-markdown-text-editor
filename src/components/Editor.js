@@ -25,11 +25,10 @@ const CustomEditor = () => {
 
   const [headerOneArr, setHeaderOneArr] =useState([])
 // console.log('com re render')
-  const handleEditorState = (editorState,char) => {
+  const handleEditorState = (editorState) => {
 
     const currentContent = editorState.getCurrentContent();
     const blocks = convertToRaw(currentContent).blocks;
-    // console.log(char,'char')
     const newBlocks = []
     blocks.forEach(block => {
       // console.log(headerOneArr,'array')
@@ -39,12 +38,16 @@ const CustomEditor = () => {
       if(!isHeaderOne && block.text === ''){
         block.type ='unstyled'
         newBlocks.push(block);
+      }else if(isHeaderOne && block.text === ' '){
+        block.style = 'unstyled'
+        setHeaderOneArr(prev=> prev.filter(prev=> prev !== block.key))
+        newBlocks.push(block)
       }else if(isHeaderOne){
         block.style = 'header-one'
         newBlocks.push(block)
       }
       else if(block.text.startsWith('# ')){
-        setHeaderOneArr(prev=> [...prev, block.key])
+        setHeaderOneArr(prev=> [...prev, block.key]) 
         block.type = 'header-one'
         block.text = ''
         newBlocks.push(block);
@@ -53,41 +56,6 @@ const CustomEditor = () => {
           block.type = 'unstyled'  
           newBlocks.push(block)
         }
-      
-
-
-      // if(!isHeaderOne && block.text === ''){
-      //     block.type = 'unstyled'
-      //     newBlocks.push(block)
-      //     console.log('reached here//////////')
-      // }
-      // else if(block.text === ' '){
-      //   block.type = 'unstyled'
-      //   newBlocks.push(block);
-      //   if(isHeaderOne){
-      //     headerOneArr.splice(headerOneArr.indexOf(block.key),1)
-      //   }
-      // }
-      // else if(block.type === 'header-one'){
-      //   newBlocks.push(block)
-      //   if(!isHeaderOne){
-      //     headerOneArr.push(block.key);
-      //   }
-      // }
-      // else if(block.text.startsWith('# ')){
-      //   if(!isHeaderOne){
-      //     headerOneArr.push(block.key);
-      //     console.log('pushed',headerOneArr)
-
-      //   }
-      //   console.log('starts with hash and space')
-      //   block.text=''
-      //   block.type = 'header-one';
-      //   newBlocks.push(block) 
-      // }else{
-      //   block.type = 'unstyled'  
-      //   newBlocks.push(block)
-      // }
     });
     const newRawContent = { ...convertToRaw(currentContent), blocks: newBlocks };
     const newContentState = convertFromRaw(newRawContent);
@@ -97,7 +65,7 @@ const CustomEditor = () => {
     setEditorState(newEditorStateWithHandleCursor);
     
     // console.log(newEditorState,)
-    // setEditorState(editorState);
+    // setEditorState(editorState); 
     console.log(blocks) 
     
   };
