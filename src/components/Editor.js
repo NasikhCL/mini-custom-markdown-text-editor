@@ -12,7 +12,7 @@ import {
   convertFromRaw,
   SelectionState,
 } from "draft-js";
-import "draft-js/dist/Draft.css";
+
 
 const { hasCommandModifier } = KeyBindingUtil;
 
@@ -154,7 +154,13 @@ const CustomEditor = () => {
         block.inlineStyleRanges = [...block.inlineStyleRanges, { offset: 0, length: block.text.length, style: 'UNDERLINE' }];
         block.text = block.text.startsWith('*** ') ? block.text.substring(4) : block.text // Remove '* ' from the text
         newBlocks.push(block);
-      }else{
+      }
+      // else if(block.text !== '' && (headerOneArr.length !== 0 || textUnderlineArr.length !== 0 || textRedArr.length !== 0  || boldArr.length !== 0 ) ){
+      //   console.log('indide  thadsfjkl ajfdslkda')
+      //   newBlocks.push(block) 
+      // }
+      else{
+        console.log('insided the sels')
           block.type = 'unstyled'  
           block.inlineStyleRanges = [];
           newBlocks.push(block)
@@ -199,36 +205,83 @@ const CustomEditor = () => {
   
 
   const handleButtonClick = () => {
-    const contentState = editorState.getCurrentContent();
-    const rawContent = convertToRaw(contentState).blocks;
-
-    const selection = editorState.getSelection();
-    let currentText = contentState
-      .getBlockForKey(editorState.getSelection().getAnchorKey())
-      .getText();
-    console.log(
-      editorState
-        .getCurrentContent()
-        .getBlockForKey(selection.getStartKey())
-        .getType(),
-      "content state"
-    );
+    saveEditorContent();
   };
+  const saveEditorContent = () => {
+    const contentState = editorState.getCurrentContent();
+    const contentStateJSON = JSON.stringify(convertToRaw(contentState));
+    localStorage.setItem('draftContent', contentStateJSON);
+    localStorage.setItem('draftContentHeaderArr', JSON.stringify(headerOneArr))
+    localStorage.setItem('draftContentTextUnderlineArr', JSON.stringify(textUnderlineArr))
+    localStorage.setItem('draftContentTextRedArr', JSON.stringify(textRedArr))
+    localStorage.setItem('draftContentTextBoldArr', JSON.stringify(boldArr))
+    console.log(headerOneArr, ' ',boldArr, ' ', textRedArr, ' ', textUnderlineArr)
+    
+    console.log('saved to local')
+    console.log(convertToRaw(contentState).blocks,'block///////////')
+  };
+  
+  useEffect(() => {
+    const storedContentStateJSON = localStorage.getItem('draftContent');
+    if (storedContentStateJSON) {
+      const contentState = convertFromRaw(JSON.parse(storedContentStateJSON));
+      const modifiedEditorState = EditorState.createWithContent(contentState);
+      const newEditorState = EditorState.push(modifiedEditorState, contentState, 'insert-characters');
+      const selectionState = editorState.getSelection();
+      const newEditorStateWithHandleCursor = EditorState.forceSelection(newEditorState, selectionState);
+    setEditorState(newEditorStateWithHandleCursor);
+      
+      setHeaderOneArr(JSON.parse(localStorage.getItem('draftContentHeaderArr')))
+      setTextUnderlineArr(JSON.parse(localStorage.getItem('draftContentTextUnderlineArr')))
+      setTextRedArr(JSON.parse(localStorage.getItem('draftContentTextRedArr')))
+      setBoldArr(JSON.parse(localStorage.getItem('draftContentTextBoldArr')))
+      // console.log(headerOneArr, ' ',boldArr, ' ', textRedArr, ' ', textUnderlineArr)
+    }
+  }, []);
 
-  // useEffect(() => {
-  //   // Function to load editor content
-  //   const rawContent = localStorage.getItem("draftContent");
 
-  //   if (rawContent) {
-  //     const contentState = JSON.parse(rawContent);
-  //     const editorState = EditorState.createWithContent(contentState);
-  //     setEditorState(editorState);
+  // useEffect(() => { 
+  //   const storedContent = localStorage.getItem('draftContent');
+  //   if (storedContent) {
+  //     try {
+  //       const parsedContent = JSON.parse(storedContent);
+  //       const currentContent = editorState.getCurrentContent();
+  //       console.log(parsedContent.blocks)
+  //       const newBlocks = parsedContent.blocks.forEach(block=>{
+  //         return block
+  //       })
+
+  //       setHeaderOneArr(JSON.parse(localStorage.getItem('draftContentHeaderArr')))
+  //       setTextUnderlineArr(JSON.parse(localStorage.getItem('draftContentTextUnderlineArr')))
+  //       setTextRedArr(JSON.parse(localStorage.getItem('draftContentTextRedArr')))
+  //       setBoldArr(JSON.parse(localStorage.getItem('draftContentTextBoldArr')))
+
+
+  //       const newRawContent = { ...convertToRaw(currentContent), blocks: newBlocks };
+  //       const newContentState = convertFromRaw(newRawContent);
+  //       const newEditorState = EditorState.push(editorState, newContentState, 'change-block');
+  //       const selectionState = editorState.getSelection();
+  //       const newEditorStateWithHandleCursor = EditorState.forceSelection(newEditorState, selectionState);
+  //       setEditorState(newEditorStateWithHandleCursor);
+  
+  //     } catch (error) {
+  //       console.error('Error parsing stored content:', error);
+  //     }
   //   }
   // }, []);
 
+  useEffect(()=>{
+    const currentContent = editorState.getCurrentContent();
+    const blocks = convertToRaw(currentContent).blocks;
+    // console.log(blocks,'new rendered')
+    // console.log(headerOneArr, ' ',boldArr, ' ', textRedArr, ' ', textUnderlineArr)
+
+  },[editorState])
+
+
   return (
     <div className="border w-full p-4">
-      <button onClick={handleButtonClick}>CHECK</button>
+      <button className="border px-2 rounded" onClick={handleButtonClick}>CHECK</button>
       <Editor
         editorState={editorState}
         onChange={handleEditorState}
