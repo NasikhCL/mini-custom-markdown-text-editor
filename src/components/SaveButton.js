@@ -5,7 +5,7 @@ const SaveButton = () => {
   const { setTriggerClick } = useHandleClick(); 
   const callSetTrigger = ()=>{
     console.log('set trigger button called')
-    setTriggerClick(true)
+    setTriggerClick(prev=> !prev)
   }
 
   return (

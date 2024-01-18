@@ -3,14 +3,8 @@ import {
   Editor,
   EditorState,
   convertToRaw,
-  ContentState,
-  RichUtils,
-  getDefaultKeyBinding,
-  KeyBindingUtil,
   Modifier,
-  ContentBlock,
   convertFromRaw,
-  SelectionState,
 } from "draft-js";
 import useHandleClick from "../customHook/useHandleClick";
 
@@ -26,13 +20,8 @@ const CustomEditor = () => {
   const [boldArr, setBoldArr] = useState([])
   const [textRedArr, setTextRedArr] = useState([])
   const [textUnderlineArr, setTextUnderlineArr] = useState([])
-  useEffect(() => {
-    console.log('trigger rerender')
-    if (triggerClick) {
-      console.log('inside the trigger')
-      saveEditorContent()
-    }
-  }, [triggerClick]);
+
+  
   
   const handleEditorState = (editorState) => {
 
@@ -186,6 +175,15 @@ const CustomEditor = () => {
   
     }
   }, []);
+
+  
+  useEffect(() => {
+    console.log('triggerClick value:', triggerClick);
+    if (triggerClick) {
+      console.log('inside the trigger');
+      saveEditorContent();
+    }
+  }, [triggerClick]);
 
 
   return (
