@@ -35,9 +35,7 @@ const CustomEditor = () => {
         block.inlineStyleRanges = [];
         block.type = "unstyled";
         setHeaderOneArr((prev) => prev.filter((prev) => prev !== block.key));
-        setTextUnderlineArr((prev) =>
-          prev.filter((prev) => prev !== block.key)
-        );
+        setTextUnderlineArr((prev) => prev.filter((prev) => prev !== block.key));
         setTextRedArr((prev) => prev.filter((prev) => prev !== block.key));
         setBoldArr((prev) => prev.filter((prev) => prev !== block.key));
         // if text is empty and already header
@@ -47,7 +45,6 @@ const CustomEditor = () => {
         }
         //if text is empty and already bold
         if (isBold) {
-          console.log("inside isBold");
           block.inlineStyleRanges = [
             { offset: 0, length: block.text.length, style: "BOLD" },
           ];
@@ -56,7 +53,6 @@ const CustomEditor = () => {
         //if text is empty and already red text
         if (isTextRed) {
           setTextRedArr((prev) => [...prev, block.key]);
-          console.log("inside isRed");
           block.inlineStyleRanges = [
             ...block.inlineStyleRanges,
             { offset: 0, length: block.text.length, style: "COLOR_RED" },
@@ -92,7 +88,7 @@ const CustomEditor = () => {
         setHeaderOneArr((prev) => [...prev, block.key]);
         block.type = "header-one";
         block.inlineStyleRanges = [];
-        block.text = block.text.substring(2); // Remove '# ' from the text
+        block.text = block.text.substring(2);
         newBlocks.push(block);
       } else if ( // if the text starts with "*** "
         block.text.startsWith("*** ") ||
@@ -108,12 +104,10 @@ const CustomEditor = () => {
           ? block.text.substring(4)
           : block.text; // Remove '* ' from the text
         newBlocks.push(block);
-        console.log("somthing underline");
       } else if ( // if the text starts with "** "
         block.text.startsWith("** ") ||
         textRedArr.includes(block.key)
       ) {
-        console.log("somthing red");
         if (!textRedArr.includes(block.key)) {
           setTextRedArr((prev) => [...prev, block.key]);
         }
@@ -135,9 +129,7 @@ const CustomEditor = () => {
           ? block.text.substring(2)
           : block.text;
         newBlocks.push(block);
-        console.log("somthing bold");
       } else { // if the block is non of this then remove all style if already there
-        console.log("insided the sels");
         block.type = "unstyled";
         block.inlineStyleRanges = [];
         newBlocks.push(block);
@@ -165,7 +157,6 @@ const CustomEditor = () => {
     );
     // update the editor state with new editor state
     setEditorState(newEditorStateWithHandleCursor);
-    console.log(blocks);
   };
 
   // to save the content to local storage
@@ -180,18 +171,6 @@ const CustomEditor = () => {
     );
     localStorage.setItem("draftContentTextRedArr", JSON.stringify(textRedArr));
     localStorage.setItem("draftContentTextBoldArr", JSON.stringify(boldArr));
-    console.log(
-      headerOneArr,
-      " ",
-      boldArr,
-      " ",
-      textRedArr,
-      " ",
-      textUnderlineArr
-    );
-
-    console.log("saved to local");
-    console.log(convertToRaw(contentState).blocks, "block///////////");
   };
 
   // handle save button
@@ -236,7 +215,7 @@ const CustomEditor = () => {
         <h2>Demo Editor by Nasikh</h2>
         <button onClick={handleSaveButton} className="border rounded px-4 py-1 hover:bg-black hover:text-white ease-in-out">Save</button>
       </div>
-      <div className="border w-full p-4">
+      <div className="border border-blue-500 w-full h-[70vh] p-4">
         <Editor
           placeholder="type here..."
           editorState={editorState}
