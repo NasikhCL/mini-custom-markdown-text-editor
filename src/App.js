@@ -8,7 +8,7 @@ function App() {
     <div className="mx-6 mt-12">
       <CustomEditor />
       <div className="text-gray-400">
-      <p>Bug: The cursor will jump back to the previous lines end when header one is applied /  developer is working on this issue, thank you for your patience</p>
+      <p>Bug: The cursor will jump back to the previous lines end when header one is applied /  developer is working on this issue, thank you for your patience. please manually move back to that line. style is already applied</p>
       <p className="text-xl font-bold">Guide:</p>
         <p>
           <span># and space '# ': </span>
